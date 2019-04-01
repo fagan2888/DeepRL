@@ -4,9 +4,14 @@ import numpy as np
 import gym
 from gym import spaces
 from gym.spaces import Box
-import cv2
-cv2.ocl.setUseOpenCL(False)
+
+try:
+    import cv2
+    cv2.ocl.setUseOpenCL(False)
+except ImportError:
+    print("[!] OpenCV not available, Atari won't work.")
 from collections import deque
+
 
 class NoopResetEnv(gym.Wrapper):
     def __init__(self, env, noop_max=30):

@@ -39,10 +39,15 @@ def run_episodes(agent):
             ep, reward, avg_reward, agent.total_steps, step))
 
         if config.save_interval and ep % config.save_interval == 0:
-            with open('data/%s-%s-online-stats-%s.bin' % (
-                    agent_type, config.tag, agent.task.name), 'wb') as f:
-                pickle.dump([steps, rewards], f)
-            agent.save('data/%s-%s-model-%s.bin' % (agent_type, config.tag, agent.task.name))
+            data_path = getattr(config, "data_path", "data")
+            save_path = f'{data_path}/%s-%s-online-stats-%s.bin' % (
+                agent_type, config.tag, agent.task.name)
+            torch.save([steps, rewards], save_path)
+            # with open('data/%s-%s-online-stats-%s.bin' % (
+            #         agent_type, config.tag, agent.task.name), 'wb') as f:
+            #     pickle.dump([steps, rewards], f)
+            agent.save(f'{data_path}/%s-%s-model-%s.bin' % (agent_type, config.tag, agent.task.name))
+            config.logger.info('saved to file...')
 
         if config.episode_limit and ep > config.episode_limit:
             break
@@ -71,10 +76,14 @@ def run_iterations(agent):
                 np.min(agent.last_episode_rewards)
             ))
         if iteration % (config.iteration_log_interval * 100) == 0:
-            with open('data/%s-%s-online-stats-%s.bin' % (agent_name, config.tag, agent.task.name), 'wb') as f:
-                pickle.dump({'rewards': rewards,
-                             'steps': steps}, f)
-            agent.save('data/%s-%s-model-%s.bin' % (agent_name, config.tag, agent.task.name))
+            data_path = getattr(config, "data_path", "data")
+            save_path = f'{data_path}/%s-%s-online-stats-%s.bin' % (agent_name, config.tag, agent.task.name)
+            torch.save({'rewards': rewards, 'steps': steps}, save_path)
+            # with open(f'{data_path}/%s-%s-online-stats-%s.bin' % (agent_name, config.tag, agent.task.name), 'wb') as f:
+            #     pickle.dump({'rewards': rewards,
+            #                  'steps': steps}, f)
+            agent.save(f'{data_path}/%s-%s-model-%s.bin' % (agent_name, config.tag, agent.task.name))
+            config.logger.info('saved to file...')
         iteration += 1
         if config.max_steps and agent.total_steps >= config.max_steps:
             agent.close()
